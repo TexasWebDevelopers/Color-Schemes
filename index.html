@@ -1,0 +1,582 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Color Schemes for the Visually Impaired</title>
+<link rel="stylesheet" href="colorwheel/colorscheme.css" type="text/css">
+<script type="text/javascript" src="colorwheel/colorscheme.js"></script>
+<script>
+function objGet(x) {
+	if (typeof x != 'string') return x;
+	else if (Boolean(document.getElementById)) return document.getElementById(x);
+	else if (Boolean(document.all)) return eval('document.all.'+x);
+	else return null;
+}
+
+function objSetStyle (obj,prop,val) {
+	var o = objGet(obj);
+	if (o && o.style) {
+		eval ('o.style.'+prop+'="'+val+'"');
+		return true;
+		}
+	else return false;
+	}
+
+function objDisplay (obj,on,type) {
+	if (on && !type) type = 'block';
+	return objSetStyle(obj,'display',(on) ? type:'none');
+	}
+
+function dec2hex(n) {
+	var s = n.toString(16);
+	if (s.length<2) s = '0'+s;
+	return s.toUpperCase();
+	}
+function hex2dec(n) {
+	return parseInt(n,16);
+	}
+
+function col2Gray(r,g,b) {
+	var lum = Math.round( r*0.299 + g*0.587 + b*0.114 );
+	return dec2hex(lum)+dec2hex(lum)+dec2hex(lum);
+	}
+
+// Color object
+
+function Color(R,G,B,H) {
+	this.setRGB(R,G,B,H);
+	}
+Color.prototype.copy = function (c) {
+	this.R = c.R; this.G = c.G; this.B = c.B;
+	this.H = c.H; this.S = c.S; this.V = c.V;
+	this.countMinMax();
+	}
+Color.prototype.setRGB = function (R,G,B,H) {
+	this.R = R;
+	this.G = G;
+	this.B = B;
+	this.checkRange();
+	this.countMinMax();
+	if (H>-1) {
+		this.H = H;
+		this.S = (this.max) ? (this.max-this.min)/this.max : 0;
+		this.V = this.max/255;
+		this.baseR = R; this.baseG = G; this.baseB = B;
+		}
+	else if (R==G && G==B) {
+		this.H = 0;
+		this.S = 0;
+		this.V = this.max/255;
+		this.baseR = R; this.baseG = G; this.baseB = B;
+		}
+	else this.countHSVByRGB();
+	}
+Color.prototype.setHex = function (hex) {
+	this.setRGB ( hex2dec(hex.substr(0,2)), hex2dec(hex.substr(2,2)), hex2dec(hex.substr(4,2)) )
+	}
+Color.prototype.getHex = function(webColors,CBMode) {
+	var r,g,b;
+	if (webColors) {
+		r = Math.round(this.R/51) * 51;
+		g = Math.round(this.G/51) * 51;
+		b = Math.round(this.B/51) * 51;
+		}
+	else {
+		r = this.R; g = this.G; b = this.B;
+		}
+	if (CBMode) {
+		if (CBMode==7) return col2Gray(r,g,b);
+		else return getColorBlindColor(r,g,b,CBMode);
+		}
+	else return dec2hex(r)+dec2hex(g)+dec2hex(b);
+	}
+Color.prototype.setHSV = function (h,s,v) {
+	this.H = h;
+	this.S = s;
+	this.V = v;
+	if (this.S>1 || this.S<0) this.S = (this.S<0) ? 0:1;
+	if (this.V>1 || this.V<0) this.V = (this.V<0) ? 0:1;
+	this.countRGBByHSV();
+	}
+Color.prototype.checkRange = function () {
+	if (this.R>255) this.R = 255;
+	if (this.G>255) this.G = 255;
+	if (this.B>255) this.B = 255;
+	}
+Color.prototype.countMinMax = function() {
+	this.max = Math.max(Math.max(this.R,this.G),this.B);
+	this.min = Math.min(Math.min(this.R,this.G),this.B);
+	this.r2max = (this.R>0) ? this.R/this.max : 0;
+	this.g2max = (this.G>0) ? this.G/this.max : 0;
+	this.b2max = (this.B>0) ? this.B/this.max : 0;
+	}
+Color.prototype.setBaseColors = function() {
+	function avrg(v1,v2,k) { return v1 + Math.round((v2-v1)*k);	}
+	var hue = Math.round(this.H) % 360;
+	var d = hue%15 + (this.H-Math.floor(this.H));
+	var k = d/15;
+	var d1 = hue - Math.floor(d);
+	var c1 = colWheel[d1];
+	d1 = (d1+15)%360;
+	var c2 = colWheel[d1];
+	this.baseR = avrg(c1.R,c2.R,k);
+	this.baseG = avrg(c1.G,c2.G,k);
+	this.baseB = avrg(c1.B,c2.B,k);
+	}
+Color.prototype.countHSVByRGB = function() {
+	var c, c1,c2, f1,f2, d, dx, d1=null, d2=null;
+	for (var i=0;i<360;i+=15) {
+		c = colWheel[i];
+		dx = Math.abs(this.r2max-c.r2max) + Math.abs(this.g2max-c.g2max) + Math.abs(this.b2max-c.b2max);
+		if (d1==null || dx<d1) { d1=dx; f2=f1; f1=i }
+		if ( (d1!=dx) && (d2==null || dx<d2) ) { d2=dx; f2=i }
+		}
+	c1 = colWheel[f1];
+	c2 = colWheel[f2];
+	var cnt = 0;
+	d = 0;
+	if (c1.R!=c2.R) { cnt++; d += (this.R-c1.R)/(c2.R-c1.R); }
+	if (c1.G!=c2.G) { cnt++; d += (this.G-c1.G)/(c2.G-c1.G); }
+	if (c1.B!=c2.B) { cnt++; d += (this.B-c1.B)/(c2.B-c1.B); }
+	if (cnt) d = d/cnt;
+	this.H = f1+15*d;
+	this.S = (this.max) ? (this.max-this.min)/this.max : 0;
+	this.V = this.max/255;
+	this.setBaseColors();
+	}
+Color.prototype.countRGBByHSV = function () {
+	this.setBaseColors();
+	var max = Math.max(Math.max(this.baseR,this.baseG),this.baseB);
+	var min = Math.min(Math.min(this.baseR,this.baseG),this.baseB);
+	var v = this.V*255;
+	var k = (max>0) ? v/max : 0;
+	this.R = Math.round(v-(v-this.baseR*k)*this.S);
+	this.G = Math.round(v-(v-this.baseG*k)*this.S);
+	this.B = Math.round(v-(v-this.baseB*k)*this.S);
+	this.checkRange();
+	this.countMinMax();
+	}
+Color.prototype.rotate = function (angle) {
+	if (this.S>0 && this.V>0) {
+		var c = new Color(this.baseR,this.baseG,this.baseB);
+		var S1 = (c.S) ? this.S/c.S : 1;
+		var V1 = (c.V) ? this.V/c.V : 1;
+		var nh = (this.H + angle) % 360;
+		this.setHSV(nh,this.S,this.V);
+		c.setRGB(this.baseR,this.baseG,this.baseB);
+		var S2 = (c.S) ? this.S/c.S : 1;
+		var V2 = (c.V) ? this.V/c.V : 1;
+		this.setHSV(nh,this.S*S1/S2,this.V*V1/V2);
+		}
+	}
+
+var colWheel = new Array(12);
+	colWheel['0']   = new Color(255,0,0,0);
+	colWheel['15']  = new Color(255,51,0,15);
+	colWheel['30']  = new Color(255,102,0,30);
+	colWheel['45']  = new Color(255,128,0,45);
+	colWheel['60']  = new Color(255,153,0,60);
+	colWheel['75']  = new Color(255,178,0,75);
+	colWheel['90']  = new Color(255,204,0,90);
+	colWheel['105'] = new Color(255,229,0,105);
+	colWheel['120'] = new Color(255,255,0,120);
+	colWheel['135'] = new Color(204,255,0,135);
+	colWheel['150'] = new Color(153,255,0,150);
+	colWheel['165'] = new Color(51,255,0,165);
+	colWheel['180'] = new Color(0,204,0,180);
+	colWheel['195'] = new Color(0,178,102,195);
+	colWheel['210'] = new Color(0,153,153,210);
+	colWheel['225'] = new Color(0,102,178,225);
+	colWheel['240'] = new Color(0,51,204,240);
+	colWheel['255'] = new Color(25,25,178,255);
+	colWheel['270'] = new Color(51,0,153,270);
+	colWheel['285'] = new Color(64,0,153,285);
+	colWheel['300'] = new Color(102,0,153,300);
+	colWheel['315'] = new Color(153,0,153,315);
+	colWheel['330'] = new Color(204,0,153,330);
+	colWheel['345'] = new Color(229,0,102,345);
+
+var usedColors = 1;
+var usedScheme = 'mono';
+var col = new Array(4);
+for (var i=0;i<4;i++) col[i] = new Color(255,0,0,0);
+var bussy = false;
+var helpOn = false;
+var webSnap = false;
+var colorblindMode = '';
+
+function getFormValue(name) { return objGet(name).value; }
+function setFormValue(name,val) { objGet(name).value = val; }
+
+function switchWebSnap() {
+	webSnap = objGet('websnapper').checked;
+	drawSample();
+	}
+
+function switchBlindlessMode() {
+	colorblindMode = getFormValue('cbmodeswitcher');
+	drawSample();
+	}
+
+function setMainColor() {
+	if (!bussy) {
+		bussy = true;
+		var h = parseInt(getFormValue('colorH'));
+			if (h>=360) { h=h%360; setFormValue('colorH',h) }
+			if (h<0) { h = (h+(Math.floor(-h/360)+1)*360)%360; setFormValue('colorH',h) }
+		var s = parseFloat(getFormValue('colorS'))/100;
+			if (s>1 || s<0) { s = (s<0) ? 0:1; setFormValue('colorS',s*100) }
+		var v = parseFloat(getFormValue('colorV'))/100;
+			if (v>1 || v<0) { v = (v<0) ? 0:1; setFormValue('colorV',v*100) }
+		col[0].setHSV (h,s,v);
+		objGet('colorhex').innerHTML = '#'+col[0].getHex();
+		drawValSat();
+		drawSample();
+		bussy = false;
+		}
+	}
+function setBasicColor(angle) {
+	var c = colWheel[angle];
+	setHSV(c.H,c.S,c.V);
+	}
+function setHSV(h,s,v) {
+	if (!bussy) {
+		bussy = true;
+		col[0].setHSV (h,s,v);
+		setFormValue( 'colorH', parseInt(h*10)/10 );
+		setFormValue( 'colorS', parseInt(s*1000)/10 );
+		setFormValue( 'colorV', parseInt(v*1000)/10 );
+		objGet('colorhex').innerHTML = '#'+col[0].getHex();
+		drawValSat();
+		drawSample();
+		bussy = false;
+		}
+	}
+
+function drawSample() {
+	usedScheme = getFormValue('scheme');
+	objGet('previmg').src = 'prev_'+usedScheme+'.gif';
+	if (helpOn) showHelp();
+	if (usedScheme=='mono') {
+		usedColors=1;
+		objDisplay('triadplus',0); objDisplay('tetradplus',0); objDisplay('analogplus',0);
+		col[1].setHSV( col[0].H, col[0].S/2, 1-(1-col[0].V)/2);
+		col[2].setHSV( col[0].H, col[0].S/4, 1-(1-col[0].V)/4);
+		col[3].setHSV( col[0].H, 2*col[0].S/3, 2*col[0].V/3);
+		drawRing(0,1,col[0].H); drawRing(1,0); drawRing(2,0); drawRing(3,0);
+		}
+	else if (usedScheme=='compl') {
+		usedColors=2;
+		objDisplay('triadplus',0); objDisplay('tetradplus',0); objDisplay('analogplus',0);
+		col[1].setHSV( col[0].H, col[0].S, col[0].V ); col[1].rotate(180);
+		col[2].setHSV( col[0].H, col[0].S/4, 1-(1-col[0].V)/4 );
+		col[3].setHSV( col[1].H, col[1].S/4, 1-(1-col[1].V)/4 );
+		drawRing(0,1,col[0].H); drawRing(1,1,col[1].H); drawRing(2,0,col[2].H); drawRing(3,0,col[3].H);
+		}
+	else if (usedScheme=='triad') {
+		usedColors=3;
+		objDisplay('triadplus',1); objDisplay('tetradplus',0); objDisplay('analogplus',0);
+		var dif = parseInt(getFormValue('triadDif'));
+		if (dif>60) { dif = 60; setFormValue('triadDif',60); }
+		if (dif<0) { dif = 0; setFormValue('triadDif',0); }
+		col[1].setHSV( col[0].H, col[0].S, col[0].V ); col[1].rotate(180-dif);
+		col[2].setHSV( col[0].H, col[0].S, col[0].V ); col[2].rotate(180+dif);
+		col[3].setHSV( col[0].H, col[0].S/4, 1-(1-col[0].V)/4);
+		drawRing(0,1,col[0].H); drawRing(1,1,col[1].H); drawRing(2,1,col[2].H); drawRing(3,0,col[3].H);
+		}
+	else if (usedScheme=='tetrad') {
+		usedColors=4;
+		objDisplay('triadplus',0); objDisplay('tetradplus',1); objDisplay('analogplus',0);
+		var dif = parseInt(getFormValue('tetradDif'));
+		if (dif>90) { dif = 90; setFormValue('tetradDif',90); }
+		if (dif<-90) { dif = -90; setFormValue('tetradDif',90); }
+		col[1].setHSV( col[0].H, col[0].S, col[0].V ); col[1].rotate(180);
+		col[2].setHSV( col[0].H, col[0].S, col[0].V ); col[2].rotate(dif);
+		col[3].setHSV( col[0].H, col[0].S, col[0].V ); col[3].rotate(180+dif);
+		drawRing(0,1,col[0].H); drawRing(1,1,col[1].H); drawRing(2,1,col[2].H); drawRing(3,1,col[3].H);
+		}
+	else if (usedScheme=='analog') {
+		usedColors=3;
+		objDisplay('triadplus',0); objDisplay('tetradplus',0); objDisplay('analogplus',1);
+		var dif = parseInt(getFormValue('analogDif'));
+		if (dif>60) { dif = 60; setFormValue('analogDif',60); }
+		if (dif<0) { dif = 0; setFormValue('analogDif',0); }
+		var compl = objGet('analogCompl').checked;
+		col[1].setHSV( col[0].H, col[0].S, col[0].V ); col[1].rotate(dif);
+		col[2].setHSV( col[0].H, col[0].S, col[0].V ); col[2].rotate(360-dif);
+		col[3].setHSV( col[0].H, col[0].S, col[0].V );
+		if (compl) { usedColors=4; col[3].rotate(180); }
+		drawRing(0,1,col[0].H); drawRing(1,1,col[1].H); drawRing(2,1,col[2].H); drawRing(3,compl,col[3].H);
+		}
+	var c;
+	for (var i=0;i<4;i++) {
+		c = col[i].getHex(webSnap,colorblindMode);
+		objSetStyle('color'+i,'background','#'+c);
+		objSetStyle('color'+i+'v','background','#'+c);
+		}
+	objGet('maincolorsample').style.backgroundColor = '#'+col[0].getHex(webSnap);
+	objDisplay('colscheme',true);
+	objDisplay('colsample',true);
+	drawColTable();
+	}
+
+function drawColTable() {
+	function addCell(c,cl) {
+		var tc = ((0.5*c.R+c.G+0.3*c.B)>220) ? 'black' : 'white';
+
+		var hx = c.getHex(webSnap);
+		if (cl) cl=' class="'+cl+'"';
+		buff += '<td style="background:#'+hx+'"'+cl+'>' +
+			'<a style="color:'+tc+'" href="javascript:setHSV('+c.H+','+c.S+','+c.V+')">' +
+			hx+'<'+'/a><'+'/td>';
+		}
+	var buff = '<table id="coltable">';
+	var c,c2 = new Color(0,0,0);
+	for (var i=0;i<usedColors;i++) {
+		buff += '<tr>';
+		addCell(col[i],'main');
+		c = col[i];
+		c2.setHSV( c.H, c.S/2, 1-(1-c.V)/2); addCell(c2);
+		c2.setHSV( c.H, c.S/4, 1-(1-c.V)/4); addCell(c2);
+		c2.setHSV( c.H, 2*c.S/3, 2*c.V/3); addCell(c2);
+		c2.setHSV( c.H, 2*c.S/3, c.V/3); addCell(c2);
+		c2.setHSV( c.H, c.S/2, c.V-(c.V-0.5)/2); addCell(c2);
+		c2.setHSV( c.H, c.S/4, c.V-(c.V-0.5)/4); addCell(c2);
+		buff += '<'+'/tr>';
+		}
+	buff += '<'+'/table>';
+	objGet('coltablein').innerHTML = buff;
+	}
+
+function drawRing(n,on,angle) {
+	var x,y,o = objGet('pointer'+n);
+	var r = (angle-90)/360 * 2*Math.PI;
+	if (on) {
+		x = Math.round( 112 + 50*Math.cos(r) );
+		y = Math.round( 113 + 50*Math.sin(r) );
+		objSetStyle(o,'left',x+'px');
+		objSetStyle(o,'top',y+'px');
+		}
+	objDisplay(o,on);
+	}
+function drawValSat() {
+	var v = Math.round(col[0].V*100);
+	var s = Math.round(col[0].S*100);
+	var pv = objGet('pointerTop');
+	var ps = objGet('pointerBottom');
+	objSetStyle(pv,'top', (100-v+5)+'px');
+	objSetStyle(pv,'left', Math.round(205+37*(100-v)/100)+'px');
+	objSetStyle(pv,'width', Math.round(3+13*v/100)+'px');
+	objSetStyle(ps,'top', (s+122)+'px');
+	objSetStyle(ps,'left', Math.round(205+37*(100-s)/100)+'px');
+	objSetStyle(ps,'width', Math.round(3+13*s/100)+'px');
+	objDisplay(pv,1);
+	objDisplay(ps,1);
+	}
+
+var dX = 20, dY = 20;
+var eX,eY;
+function getEvent(e) {
+	if (!e) e = window.event;
+	eX = (e.x) ? e.x : e.clientX;
+	eY = (e.y) ? e.y : e.clientY;
+	}
+function moveHue(e) {
+	var a,x,y,h;
+	getEvent(e);
+	x = eX - dX - 113;
+	y = eY - dY - 113;
+	h = Math.round(((Math.atan2(-x,y) * 180/Math.PI) + 180) % 360);
+	setFormValue('colorH',h);
+	setMainColor();
+	}
+function showHueInfo(e) {
+	var a,x,y,h;
+	getEvent(e);
+	x = eX - dX - 113;
+	y = eY - dY - 113;
+	h = Math.round(((Math.atan2(-x,y) * 180/Math.PI) + 180) % 360);
+	window.status = 'angle (hue): '+h;
+	}
+
+function moveVal(e) {
+	var a,y,v;
+	getEvent(e);
+	y = eY - dY;
+	v = 105-y; if (v<0) v = 0; else if (v>100) v = 100;
+	setFormValue('colorV',v);
+	setMainColor();
+	}
+function showValInfo(e) {
+	var a,y,v;
+	getEvent(e);
+	y = eY - dY;
+	v = 105-y; if (v<0) v = 0; else if (v>100) v = 100;
+	window.status = 'brightness: '+v;
+	}
+
+function moveSat(e) {
+	var a,y,s;
+	getEvent(e);
+	y = eY - dY;
+	s = y-122; if (s<0) s = 0; else if (s>100) s = 100;
+	setFormValue('colorS',s);
+	setMainColor();
+	}
+function showSatInfo(e) {
+	var a,y,s;
+	getEvent(e);
+	y = eY - dY;
+	s = y-122; if (s<0) s = 0; else if (s>100) s = 100;
+	window.status = 'saturation: '+s;
+	}
+
+function showHelp() {
+	helpOn = !helpOn;
+	if (!objGet('help').src) objGet('help').src = 'colorwheel/help.htm';
+	objDisplay('colsample',!helpOn);
+	objDisplay('coltablecover',!helpOn);
+	objDisplay('help',helpOn);
+	objGet('helptext').innerHTML = (helpOn) ? 'Hide help' : 'Show Help';
+	}
+
+window.onload = Init;
+function Init() {
+	objGet('midarea').onclick = moveHue;
+	objGet('midarea').onmousemove = showHueInfo;
+	objGet('topmover').onclick = moveVal;
+	objGet('topmover').onmousemove = showValInfo;
+	objGet('bottommover').onclick = moveSat;
+	objGet('bottommover').onmousemove = showSatInfo;
+	drawValSat();
+	drawSample();
+	}
+    </script>
+    </head>
+<body>
+<div id="image">
+<img src="colorwheel/wheel2-en.gif" alt="" width="245" height="228" usemap="#map" border="0">
+<div id="pointer0"></div>
+<div id="pointer1"></div>
+<div id="pointer2"></div>
+<div id="pointer3"></div>
+<div id="pointerTop"></div>
+<div id="pointerBottom"></div>
+</div>
+
+<MAP name="map"> 
+	<AREA id="midarea" shape="circle" coords="113,113,54"> 
+    <AREA id="topmover" shape="poly" coords="200,0,230,0,245,110,240,110">
+    <AREA id="bottommover" shape="poly" coords="200,228,230,228,245,110,240,110">
+	<AREA href="javascript:setBasicColor(0)" shape="circle" coords="113,18,19">
+	<AREA href="javascript:setBasicColor(15)" shape="circle" coords="131,49,13">
+	<AREA href="javascript:setBasicColor(30)" shape="circle" coords="161,31,19">
+	<AREA href="javascript:setBasicColor(45)" shape="circle" coords="161,67,13">
+	<AREA href="javascript:setBasicColor(60)" shape="circle" coords="197,66,19">
+	<AREA href="javascript:setBasicColor(75)" shape="circle" coords="178,97,13">
+	<AREA href="javascript:setBasicColor(90)" shape="circle" coords="209,114,19">
+	<AREA href="javascript:setBasicColor(105)" shape="circle" coords="179,130,13">
+	<AREA href="javascript:setBasicColor(120)" shape="circle" coords="197,162,19">
+	<AREA href="javascript:setBasicColor(135)" shape="circle" coords="161,161,13">
+	<AREA href="javascript:setBasicColor(150)" shape="circle" coords="161,196,19">
+	<AREA href="javascript:setBasicColor(165)" shape="circle" coords="131,177,13">
+	<AREA href="javascript:setBasicColor(180)" shape="circle" coords="113,209,19">
+	<AREA href="javascript:setBasicColor(195)" shape="circle" coords="96,178,13">
+	<AREA href="javascript:setBasicColor(210)" shape="circle" coords="66,196,19">
+	<AREA href="javascript:setBasicColor(225)" shape="circle" coords="66,161,13">
+	<AREA href="javascript:setBasicColor(240)" shape="circle" coords="31,161,19">
+	<AREA href="javascript:setBasicColor(255)" shape="circle" coords="49,131,13">
+	<AREA href="javascript:setBasicColor(270)" shape="circle" coords="18,114,19">
+	<AREA href="javascript:setBasicColor(285)" shape="circle" coords="49,96,13">
+	<AREA href="javascript:setBasicColor(300)" shape="circle" coords="31,66,19">
+	<AREA href="javascript:setBasicColor(315)" shape="circle" coords="66,66,13">
+	<AREA href="javascript:setBasicColor(330)" shape="circle" coords="66,31,19">
+	<AREA href="javascript:setBasicColor(345)" shape="circle" coords="96,49,13"> 
+</MAP>
+
+<div id="colform">
+
+<p class="center">
+	Base color: <span id="colorhex">#FF0000</span>
+  <div id="maincolorsample"></div>
+</p>
+
+<p class="center lineup">
+<form id="form2" onsubmit="setMainColor();return false">
+<table id="hsvtable">
+<tr>
+	<td><input type="text" id="colorH" size="6" value="0" onchange="setMainColor()"></td>
+	<td><input type="text" id="colorS" size="6" value="100" onchange="setMainColor()"></td>
+	<td><input type="text" id="colorV" size="6" value="100" onchange="setMainColor()"></td>
+</tr>
+<tr><td>Hue &deg;</td><td>Saturation %</td><td>Brightness %</td></tr>
+</table>
+<button type="button" onclick="setMainColor();return false"> Submit </button>
+</form>
+</p>
+</div>
+
+<div id="colscheme">
+<form id="form3" onsubmit="drawSample();return false">
+<a id="helptext" href="colorwheel/help.htm" target="_blank" onclick="showHelp();return false"><img id="previmg" align="right" src="/colorwheel/prev_mono.gif" alt="" width="51" height="51" style="cursor:pointer;cursor:hand;" title="Show Help"></a>
+<p>Scheme: &nbsp;
+<select id="scheme" onchange="drawSample()">
+	<option value="mono" checked="checked">monochromatic</option>
+	<option value="compl">contrast (base + complement)</option>
+	<option value="triad">soft contrast (split complements)</option>
+	<option value="tetrad">double-contrast (2 neighbors + complements)</option>
+	<option value="analog">analogic (base + neighbors)</option>
+</select>
+</p>
+<p class="hide" id="triadplus">
+	Distance [0 to 60&deg;]: &nbsp; <input type="text" id="triadDif" size="5" value="30" onchange="drawSample()">&deg; &nbsp;
+	<span class="small">0&deg; - contrast, 60&deg; - triade</span> &nbsp;
+	<button type="button" onclick="drawSample();return false"> Submit </button>
+</p>
+<p class="hide" id="tetradplus">
+	Distance [-90 to 90&deg;]: &nbsp; <input type="text" id="tetradDif" size="5" value="30" onchange="drawSample()">&deg; &nbsp;
+	<span class="small">(90&deg; - tetrade)</span> &nbsp;
+	<button type="button" onclick="drawSample();return false"> Submit </button>
+</p>
+<p class="hide" id="analogplus">
+	Distance [0 to 60&deg;] &nbsp; <input type="text" id="analogDif" size="5" value="30" onchange="drawSample()">&deg; &nbsp;
+	<input type="checkbox" id="analogCompl" onchange="drawSample()" onclick="drawSample()" value="ON"> add the complement &nbsp;
+	<button type="button" onclick="drawSample();return false"> Submit </button>
+</p>
+</form>
+</div>
+
+<div id="colsample">
+	<div id="color0"></div>
+	<div id="color1"></div>
+	<div id="color2"></div>
+	<div id="color3"></div>
+	<div id="color0v"></div>
+	<div id="color1v"></div>
+	<div id="color2v"></div>
+	<div id="color3v"></div>
+	<div id="colorBW"></div>
+	<div id="textBlack">Sample Black Text</div>
+	<div id="textWhite">Sample White Text</div>
+</div>
+<div id="coltablecover">
+<div id="coltablein"></div>
+<form class="center odstup">
+	<input type="checkbox" id="websnapper" onclick="switchWebSnap()" onchange="switchWebSnap()" value="ON"> WebColors &nbsp;
+	<select id="cbmodeswitcher" onchange="switchBlindlessMode()">
+		<option value="">Normal vision (cca 85,5 % of population)</option>
+		<option value="1">Protanopy (1 % of men)</option>
+		<option value="2">Deuteranopy (1 % of men)</option>
+		<option value="3">Tritanopy (cca 0,003 % of population)</option>
+		<option value="4">Protanomaly (1 % of men)</option>
+		<option value="5">Deuteranomaly (5 % men, 0.4 % women)</option>
+		<option value="6">Tritanomaly (as good as 0 %)</option>
+		<option value="7">Full colorbindness (0,005% of population)</option>
+		<option value="8">Atypical monochromatism</option>
+	</select>
+	
+</form>
+</div>
+
+</body>
+</html>

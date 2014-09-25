@@ -1,0 +1,203 @@
+body {
+	margin:20px;
+}
+
+TD {
+	BACKGROUND: white; FONT: 100%  Arial, Helvetica, sans-serif;
+}
+.lineup {
+	BORDER-TOP: silver 1px solid; PADDING-TOP: 1ex
+}
+.center {
+	TEXT-ALIGN: center
+}
+.right {
+	TEXT-ALIGN: right
+}
+.small {
+	FONT-SIZE: 90%
+}
+.odstup {
+	PADDING-TOP: 1em
+}
+P {
+	MARGIN: 1ex 0px
+}
+H4 {
+	FONT-WEIGHT: bold; FONT-SIZE: 1em; MARGIN: 1ex 0px; TEXT-ALIGN: center
+}
+INPUT {
+	FONT-SIZE: 10px; VERTICAL-ALIGN: middle; TEXT-ALIGN: center
+}
+BUTTON {
+	FONT-SIZE: 10px; VERTICAL-ALIGN: middle; TEXT-ALIGN: center
+}
+SELECT {
+	FONT-SIZE: 10px; VERTICAL-ALIGN: middle; TEXT-ALIGN: center
+}
+BUTTON {
+	PADDING-RIGHT: 1ex; PADDING-LEFT: 1ex; PADDING-BOTTOM: 2px; PADDING-TOP: 2px
+}
+FORM {
+	MARGIN: 0px
+}
+#hsvtable {
+	WIDTH: 100%
+}
+#hsvtable TD {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; PADDING-TOP: 0px; WHITE-SPACE: nowrap; TEXT-ALIGN: center
+}
+#image {
+	
+}
+#maincolorsample {
+	MARGIN: 0.5ex 15% 1ex; HEIGHT: 25px
+}
+#colform {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; LEFT: 16px; PADDING-BOTTOM: 0px; WIDTH: 230px; PADDING-TOP: 0px; POSITION: absolute; TOP: 446px
+}
+#colscheme {
+	DISPLAY: none; LEFT: 300px; WIDTH: 450px; POSITION: absolute; TOP: 145px
+}
+#colsample {
+	DISPLAY: none; LEFT: 300px; WIDTH: 450px; POSITION: absolute; TOP: 240px
+}
+#help {
+	DISPLAY: none; LEFT: 300px; WIDTH: 450px; POSITION: absolute; TOP: 140px; HEIGHT: 300px
+}
+#color0 {
+	LEFT: 0px; WIDTH: 450px; POSITION: absolute; TOP: 0px; HEIGHT: 80px
+}
+#color1 {
+	LEFT: 0px; WIDTH: 450px; POSITION: absolute; TOP: 80px; HEIGHT: 50px
+}
+#color2 {
+	LEFT: 0px; WIDTH: 450px; POSITION: absolute; TOP: 130px; HEIGHT: 50px
+}
+#color3 {
+	LEFT: 0px; WIDTH: 450px; POSITION: absolute; TOP: 180px; HEIGHT: 50px
+}
+#color1v {
+	LEFT: 100px; WIDTH: 50px; POSITION: absolute; TOP: 30px; HEIGHT: 190px
+}
+#color0v {
+	LEFT: 170px; WIDTH: 50px; POSITION: absolute; TOP: 30px; HEIGHT: 190px
+}
+#color2v {
+	LEFT: 250px; WIDTH: 50px; POSITION: absolute; TOP: 30px; HEIGHT: 190px
+}
+#color3v {
+	LEFT: 320px; WIDTH: 50px; POSITION: absolute; TOP: 30px; HEIGHT: 190px
+}
+#colorBW {
+	BORDER-RIGHT: black 5px solid; BORDER-TOP: white 1px solid; LEFT: 50px; BORDER-LEFT: white 5px solid; WIDTH: 350px; BORDER-BOTTOM: black 1px solid; POSITION: absolute; TOP: 50px; HEIGHT: 150px
+}
+#textBlack {
+	FONT-SIZE: 14px; LEFT: 5px; WIDTH: 440px; COLOR: black; POSITION: absolute; TOP: 5px; TEXT-ALIGN: left
+}
+#textWhite {
+	FONT-SIZE: 14px; LEFT: 5px; WIDTH: 440px; COLOR: white; POSITION: absolute; TOP: 5px; TEXT-ALIGN: right
+}
+#coltablecover {
+	LEFT: 298px; WIDTH: 450px; POSITION: absolute; TOP: 500px
+}
+#coltable {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; WIDTH: 100%; PADDING-TOP: 0px
+}
+#coltable TD {
+	PADDING-RIGHT: 0.5ex; PADDING-LEFT: 1em; FONT-SIZE: 80%; PADDING-BOTTOM: 0.5ex; MARGIN: 2px; VERTICAL-ALIGN: bottom; PADDING-TOP: 1em; TEXT-ALIGN: center
+}
+#coltable TD.main {
+	BORDER-RIGHT: white 1em solid
+}
+#midarea {
+	CURSOR: nw-resize
+}
+#topmover {
+	CURSOR: nw-resize
+}
+#bottommover {
+	CURSOR: nw-resize
+}
+#pointer0 {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 2px; POSITION: absolute; HEIGHT: 2px
+}
+#pointer1 {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 2px; POSITION: absolute; HEIGHT: 2px
+}
+#pointer2 {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 2px; POSITION: absolute; HEIGHT: 2px
+}
+#pointer3 {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 2px; POSITION: absolute; HEIGHT: 2px
+}
+#pointer0 {
+	BACKGROUND: black
+}
+#pointerTop {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 5px; POSITION: absolute; HEIGHT: 1px
+}
+#pointerBottom {
+	DISPLAY: none; FONT-SIZE: 1px; BACKGROUND: #999999; WIDTH: 5px; POSITION: absolute; HEIGHT: 1px
+}
+
+a {
+	font-size: 90%;
+	color: #013299;
+	font-weight: bold;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: none;
+	color: #990000;
+}
+
+.copyright {
+	font-family:  Arial, Helvetica, sans-serif;
+	font-size: 70%;
+	font-weight: bold;
+	color: #013299;
+}
+hr {
+	width: 760px;
+	color: #013299;
+}
+.header {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 60%;
+	color: #013299;
+}
+.bookmark {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 120%;
+	color: #013299;
+}
+.nav a {
+	font-size: 75%;
+	color: #013299;
+	font-weight: bold;
+	text-decoration: none;
+}
+.nav a:hover {
+	text-decoration: none;
+	color: #990000;
+}
+.footer a {
+	font-size: 75%;
+	color: #013299;
+	font-weight: bold;
+	text-decoration: none;
+}
+.footer a:hover {
+	text-decoration: none;
+	color: #990000;
+}h6 {
+	font-family:  Arial, Helvetica, sans-serif;
+	font-size: 100%;
+}
+h5 {
+	font-family:  Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	font-weight: bold;
+	color: #990000;
+}
